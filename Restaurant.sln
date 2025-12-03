@@ -1,0 +1,37 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.36603.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Restaurant", "Restaurant\Restaurant.csproj", "{8A0FF268-461E-494D-BFD6-8BBADC7ADEFE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain", "Domain\Domain.csproj", "{F047CA4E-6742-4C06-92E3-EE3248D22FA0}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DataAccess", "DataAccess\DataAccess.csproj", "{82B21C12-C504-4372-9BB9-DA746F53128C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{8A0FF268-461E-494D-BFD6-8BBADC7ADEFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A0FF268-461E-494D-BFD6-8BBADC7ADEFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A0FF268-461E-494D-BFD6-8BBADC7ADEFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A0FF268-461E-494D-BFD6-8BBADC7ADEFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F047CA4E-6742-4C06-92E3-EE3248D22FA0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F047CA4E-6742-4C06-92E3-EE3248D22FA0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F047CA4E-6742-4C06-92E3-EE3248D22FA0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F047CA4E-6742-4C06-92E3-EE3248D22FA0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{82B21C12-C504-4372-9BB9-DA746F53128C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{82B21C12-C504-4372-9BB9-DA746F53128C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{82B21C12-C504-4372-9BB9-DA746F53128C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{82B21C12-C504-4372-9BB9-DA746F53128C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {9209725B-351C-4552-9B62-8DAECF89EF88}
+	EndGlobalSection
+EndGlobal
