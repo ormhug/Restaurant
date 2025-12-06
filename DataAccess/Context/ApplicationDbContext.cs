@@ -22,11 +22,22 @@ namespace DataAccess.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // Здесь мы можем явно определить внешние ключи и другие связи.
+            // Отношение "один ко многим"
             modelBuilder.Entity<MenuItem>()
-                .HasOne(mi => mi.Restaurant) // У MenuItem есть один Restaurant
-                .WithMany(r => r.MenuItems) // У Restaurant много MenuItems
-                .HasForeignKey(mi => mi.RestaurantId); // Внешний ключ
+                .HasOne(mi => mi.Restaurant)
+                .WithMany(r => r.MenuItems)
+                .HasForeignKey(mi => mi.RestaurantId);
+
+            // ИСПРАВЛЕНИЕ ПРЕДУПРЕЖДЕНИЯ ДЛЯ DECIMAL
+            modelBuilder.Entity<MenuItem>()
+                .Property(mi => mi.Price)
+                // Устанавливаем точность: 18 цифр всего, 2 после запятой (например, 1234567890123456.78)
+                .HasPrecision(18, 2);
+
+            // Добавьте это, если вы используете Id: guid для MenuItem, как мы обсуждали ранее
+             modelBuilder.Entity<MenuItem>()
+                 .Property(mi => mi.Id)
+                 .ValueGeneratedOnAdd(); 
         }
     }
 }
