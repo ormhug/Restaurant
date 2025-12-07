@@ -22,7 +22,7 @@ namespace Domain.Entities
         public int RestaurantId { get; set; }
         public Restaurant Restaurant { get; set; } = null!;
 
-        // Реализация GetValidators(): MenuItem одобряет Владелец Ресторана [cite: 54]
+        // Реализация GetValidators(): MenuItem одобряет Владелец Ресторана 
         public List<string> GetValidators()
         {
             // Возвращаем email владельца связанного ресторана
@@ -33,11 +33,27 @@ namespace Domain.Entities
             return new List<string>();
         }
 
-        // Реализация GetCardPartial(): Возвращает имя Partial View [cite: 54]
+        // Реализация GetCardPartial(): Возвращает имя Partial View 
         public string GetCardPartial()
         {
             // Имя представления для элемента Меню
-            return "_MenuItemRowPartial";
+            return "_MenuItemCardPartial";
+        }
+
+
+        public List<string> Validate()
+        {
+            var errors = new List<string>();
+            if (string.IsNullOrWhiteSpace(Title))
+            {
+                errors.Add("Menu Item Title cannot be empty.");
+            }
+            if (Price <= 0)
+            {
+                errors.Add("Price must be greater than zero.");
+            }
+
+            return errors;
         }
     }
 }

@@ -24,18 +24,43 @@ public class BulkImportController : Controller
     {
         if (jsonFile == null || jsonFile.Length == 0)
         {
-            // Здесь может быть логирование или возврат ошибки пользователю
             return BadRequest("File not provided.");
         }
 
-        // Используем Stream для чтения файла
         using (var stream = jsonFile.OpenReadStream())
         {
             // 1. Вызов ImportItemFactory.CreateAsync (AA2.3.1)
+            // parsedItems теперь является List<IItemValidating>
             var parsedItems = await ImportItemFactory.CreateAsync(stream);
 
-            // 2. Вызов await inMemoryRepo.SaveAsync(parsedItems)
-            await inMemoryRepo.SaveAsync(parsedItems);
+            // --- НОВАЯ ЛОГИКА ВАЛИДАЦИИ (AA4.3.1) ---
+            var validItems = new List<IItemValidating>();
+            var errorsDictionary = new Dictionary<IItemValidating, List<string>>();
+
+            foreach (var item in parsedItems)
+            {
+                var itemErrors = item.Validate();
+
+                if (itemErrors.Any())
+                {
+                    // Если есть ошибки, добавляем элемент и ошибки в словарь ошибок
+                    errorsDictionary.Add(item, itemErrors);
+                }
+                else
+                {
+                    // Если ошибок нет, добавляем элемент в список для сохранения
+                    validItems.Add(item);
+                }
+            }
+            // --- КОНЕЦ ЛОГИКИ ВАЛИДАЦИИ ---
+
+            // 2. Вызов SaveAsync: теперь сохраняем ТОЛЬКО валидные элементы
+            await inMemoryRepo.SaveAsync(validItems);
+
+            // В реальном приложении: Сохраните errorsDictionary в TempData/ViewData
+            // чтобы отобразить эти ошибки на странице "Preview".
+            // Например: TempData["ImportErrors"] = errorsDictionary; 
+
         }
 
         // Перенаправляем на страницу предпросмотра

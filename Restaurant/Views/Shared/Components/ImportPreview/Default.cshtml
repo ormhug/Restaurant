@@ -1,0 +1,35 @@
+﻿@model List<Domain.Interfaces.IItemValidating>
+@* Используем модель List<IItemValidating> *@
+
+<div class="row">
+    @if (!Model.Any())
+    {
+        <div class="col-12">
+            <p class="alert alert-info">No items for preview. Please load valid JSON file.</p>
+        </div>
+    }
+    else
+    {
+        <div class="col-12 mb-3">
+            <h4 class="text-secondary">Preview imported elements (@Model.Count)</h4>
+            <p>These elements will be added to the database after clicking "Commit".</p>
+        </div>
+
+        @foreach (var item in Model)
+        {
+            // Здесь мы вызываем частичное представление, определенное в сущности через GetCardPartial()
+            <div class="col-md-6 mb-4">
+                @await Html.PartialAsync(item.GetCardPartial(), item)
+            </div>
+        }
+
+        <div class="col-12 mt-4">
+            @* Кнопка для вызова метода Commit в BulkImportController *@
+            <form asp-controller="BulkImport" asp-action="Commit" method="post">
+                <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-check-circle"></i> Commit Data to Database 
+                </button>
+            </form>
+        </div>
+    }
+</div>

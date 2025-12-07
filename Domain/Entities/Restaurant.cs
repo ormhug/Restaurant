@@ -36,5 +36,25 @@ namespace Domain.Entities
             // Имя представления для карточки Ресторана
             return "_RestaurantCardPartial";
         }
+
+        //public List<string> Validate()
+        //{
+        //    throw new NotImplementedException();
+        //}
+
+        public List<string> Validate()
+        {
+            var errors = new List<string>();
+            if (string.IsNullOrWhiteSpace(Name))
+            {
+                errors.Add("Restaurant Name cannot be empty.");
+            }
+            if (string.IsNullOrWhiteSpace(OwnerEmailAddress))
+            {
+                errors.Add("Owner Email Address cannot be empty.");
+            }
+
+            return errors;
+        }
     }
 }

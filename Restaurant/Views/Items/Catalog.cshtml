@@ -1,0 +1,28 @@
+﻿@model List<Domain.Interfaces.IItemValidating>
+@{
+    ViewData["Title"] = "Items Catalog";
+}
+
+<h1> Catalog:</h1>
+
+<p>All items in database.</p>
+
+@if (Model == null || !Model.Any())
+{
+    <div class="alert alert-warning">
+        Catalog is empty. Import and commit data using Bulk Import.
+    </div>
+}
+else
+{
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            // Используем метод GetCardPartial() для отображения карточки.
+            // Это требование AA4.3.5, которое мы реализуем через View Component,
+            // но пока для простоты вызовем частичное представление напрямую.
+            // ПРИМЕЧАНИЕ: На следующем этапе, возможно, потребуется заменить это на View Component.
+            await Html.PartialAsync(item.GetCardPartial(), item);
+        }
+    </div>
+}

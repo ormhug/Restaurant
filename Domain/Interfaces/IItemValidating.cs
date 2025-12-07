@@ -17,5 +17,7 @@ namespace Domain.Interfaces
 
         // Возвращает имя Partial View для отображения карточки [cite: 54]
         string GetCardPartial();
+
+        List<string> Validate();
     }
 }

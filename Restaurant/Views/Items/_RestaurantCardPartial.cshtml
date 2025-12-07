@@ -1,0 +1,17 @@
+﻿@model Domain.Entities.Restaurant
+<div class="col-md-4 mb-4">
+    <div class="card h-100 shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h5 class="mb-0"> @Model.Name</h5>
+        </div>
+        <div class="card-body">
+            <p class="card-text"><strong>Статус:</strong> <span class="badge bg-info">@Model.Status</span></p>
+            <p class="card-text"><strong>Описание:</strong> @Model.Description.Substring(0, Math.Min(Model.Description.Length, 80))...</p>
+            <p class="card-text"><strong>Адрес:</strong> @Model.Address</p>
+            <p class="card-text"><strong>Телефон:</strong> @Model.Phone</p>
+        </div>
+        <div class="card-footer text-muted">
+            <small>ID: @Model.Id</small>
+        </div>
+    </div>
+</div>
