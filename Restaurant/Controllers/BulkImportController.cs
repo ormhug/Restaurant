@@ -1,25 +1,28 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Domain; // Добавили using для ImportItemFactory
+using Domain;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http; // Добавили using для IFormFile
-
-// Ключи, которые мы определили в Program.cs:
-// const string InMemoryKey = "InMemory"; 
-// const string DbKey = "Database";      
-
+using Microsoft.AspNetCore.Http;
+using System.Collections.Generic;
+using System.IO;
 
 public class BulkImportController : Controller
 {
     const string InMemoryKey = "InMemory";
     const string DbKey = "Database";
+    private readonly IZipService _zipService; // Поле для инжектированного сервиса
 
-    // AA2.3.4: Метод BulkImport использует только InMemory репозиторий
+    // Конструктор для Dependency Injection
+    public BulkImportController(IZipService zipService)
+    {
+        _zipService = zipService;
+    }
+
+    // AA2.3.4, AA4.3.3: Метод BulkImport теперь возвращает ZIP-файл
     [HttpPost]
-    public async Task<IActionResult> BulkImport( // Сделали метод асинхронным
+    public async Task<IActionResult> BulkImport(
         IFormFile jsonFile,
-        // Инъекция ItemsInMemoryRepository по ключу "InMemory"
         [FromKeyedServices(InMemoryKey)] IItemsRepository inMemoryRepo)
     {
         if (jsonFile == null || jsonFile.Length == 0)
@@ -29,11 +32,8 @@ public class BulkImportController : Controller
 
         using (var stream = jsonFile.OpenReadStream())
         {
-            // 1. Вызов ImportItemFactory.CreateAsync (AA2.3.1)
-            // parsedItems теперь является List<IItemValidating>
             var parsedItems = await ImportItemFactory.CreateAsync(stream);
 
-            // --- НОВАЯ ЛОГИКА ВАЛИДАЦИИ (AA4.3.1) ---
             var validItems = new List<IItemValidating>();
             var errorsDictionary = new Dictionary<IItemValidating, List<string>>();
 
@@ -43,52 +43,70 @@ public class BulkImportController : Controller
 
                 if (itemErrors.Any())
                 {
-                    // Если есть ошибки, добавляем элемент и ошибки в словарь ошибок
+                    // Добавление ошибок...
                     errorsDictionary.Add(item, itemErrors);
                 }
                 else
                 {
-                    // Если ошибок нет, добавляем элемент в список для сохранения
                     validItems.Add(item);
                 }
             }
-            // --- КОНЕЦ ЛОГИКИ ВАЛИДАЦИИ ---
 
-            // 2. Вызов SaveAsync: теперь сохраняем ТОЛЬКО валидные элементы
+            // 1. Сохранение ТОЛЬКО валидных элементов в кэш
             await inMemoryRepo.SaveAsync(validItems);
 
-            // В реальном приложении: Сохраните errorsDictionary в TempData/ViewData
-            // чтобы отобразить эти ошибки на странице "Preview".
-            // Например: TempData["ImportErrors"] = errorsDictionary; 
+            // 2. Генерация ZIP-файла (AA4.3.3)
+            var zipBytes = _zipService.GenerateZipForDownload(validItems);
 
+            // 3. Возвращаем файл для скачивания
+            return File(
+                zipBytes,
+                "application/zip",
+                "Items_for_Image_Upload.zip");
         }
 
-        // Перенаправляем на страницу предпросмотра
-        return View("Preview");
+        // НЕДОСТИЖИМЫЙ КОД (БЫЛ УДАЛЕН): return View("Preview");
     }
 
-    // AA4.3: Метод Commit использует оба репозитория
+    // НОВЫЙ GET-метод для отображения страницы предпросмотра после скачивания ZIP
+    [HttpGet]
+    public IActionResult Preview()
+    {
+        return View();
+    }
+
+    // AA4.3: Метод Commit (будет обновлен на следующем шаге для приема ZIP)
     [HttpPost]
-    public async Task<IActionResult> Commit( // Сделали метод асинхронным
+    public async Task<IActionResult> Commit(
+        IFormFile zipFile, // НОВЫЙ ПАРАМЕТР: Принимаем ZIP-файл с изображениями
         [FromKeyedServices(InMemoryKey)] IItemsRepository inMemoryRepo,
         [FromKeyedServices(DbKey)] IItemsRepository dbRepo)
     {
-        // 1. Чтение данных из кэша: var items = await inMemoryRepo.GetAsync();
-        var itemsToCommit = await inMemoryRepo.GetAsync();
+        // 1. Чтение данных из кэша
+        var itemsToCommit = (await inMemoryRepo.GetAsync()).ToList();
 
         if (!itemsToCommit.Any())
         {
             return RedirectToAction("Catalog", "Items");
         }
 
-        // 2. Сохранение в БД: await dbRepo.SaveAsync(items);
+        // 2. [НОВЫЙ ШАГ] Обработка и сохранение изображений из ZIP (AA4.3.4)
+        if (zipFile != null && zipFile.Length > 0)
+        {
+            // Вызываем сервис для извлечения, сохранения файлов и обновления itemsToCommit
+            using (var stream = zipFile.OpenReadStream())
+            {
+                await _zipService.ProcessUploadedZipAsync(stream, itemsToCommit);
+            }
+        }
+
+        // 3. Сохранение ОБНОВЛЕННЫХ данных в БД:
         await dbRepo.SaveAsync(itemsToCommit);
 
-        // 3. Очистка кэша: inMemoryRepo.Clear();
-        // Clear обычно синхронен, но если он асинхронен, нужно добавить await.
-        // Предполагаем, что Clear в ItemsInMemoryRepository синхронен.
+        // 4. Очистка кэша:
         inMemoryRepo.Clear();
 
+        TempData["SuccessMessage"] = "Импорт данных и изображений завершен!";
         return RedirectToAction("Catalog", "Items");
     }
 }

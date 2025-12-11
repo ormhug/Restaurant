@@ -19,5 +19,11 @@ namespace Domain.Interfaces
         string GetCardPartial();
 
         List<string> Validate();
+
+        string ImagePath { get; set; }
+
+        string UniqueImportId { get; }
+
+
     }
 }

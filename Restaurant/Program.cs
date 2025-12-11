@@ -1,12 +1,13 @@
+// Program.cs
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using DataAccess;
 using Domain.Interfaces;
+using Services; // Используем правильное пространство имен для ZipService
 
 var builder = WebApplication.CreateBuilder(args);
 
 // --- 1. Конфигурация Базы Данных ---
-// (Предполагается, что строка подключения 'DefaultConnection' настроена в appsettings.json)
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -16,7 +17,6 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
         b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
 // --- 2. Конфигурация Кэша ---
-// Регистрация IMemoryCache (требуется по критериям)
 builder.Services.AddMemoryCache();
 
 
@@ -27,23 +27,20 @@ const string InMemoryKey = "InMemory";
 const string DbKey = "Database";
 
 // 3.1. Регистрация ItemsInMemoryRepository
-// AddKeyedScoped означает: использовать ItemsInMemoryRepository, когда запрошен IItemsRepository с ключом "InMemory".
 builder.Services.AddKeyedScoped<IItemsRepository, ItemsInMemoryRepository>(InMemoryKey);
 
 // 3.2. Регистрация ItemsDbRepository
 builder.Services.AddKeyedScoped<IItemsRepository, ItemsDbRepository>(DbKey);
 
 
-// Добавление других сервисов (MVC/Razor Pages)
+// --- 4. Регистрация Сервисов и MVC ---
+
+// Регистрация ZipService (он инжектирует IWebHostEnvironment, который зарегистрирован автоматически)
+builder.Services.AddScoped<IZipService, ZipService>();
+
+// Добавление других сервисов (MVC/Razor Pages). Удалили дубликат!
 builder.Services.AddControllersWithViews();
 
-
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"))
-);
-
-// Add services to the container.
-builder.Services.AddControllersWithViews();
 
 var app = builder.Build();
 
@@ -51,12 +48,11 @@ var app = builder.Build();
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+app.UseStaticFiles(); // ВАЖНО: Разрешает доступ к wwwroot для изображений
 
 app.UseRouting();
 

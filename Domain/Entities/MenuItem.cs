@@ -8,8 +8,17 @@ namespace Domain.Entities
     // Реализуем интерфейс IItemValidating
     public class MenuItem : IItemValidating
     {
+        
+
+
+        public string ImagePath { get; set; } = string.Empty;
+
+
         // Используем Guid, как указано в критериях [cite: 50]
+
         public Guid Id { get; set; }
+
+        public string UniqueImportId => $"M{Id:N}";
 
         // 1. Поле Status (обязательно по критериям) [cite: 50]
         // Устанавливаем статус 'pending' по умолчанию (в Factory) [cite: 66]
@@ -39,6 +48,8 @@ namespace Domain.Entities
             // Имя представления для элемента Меню
             return "_MenuItemCardPartial";
         }
+
+        // Add the missing UniqueImportId property implementation to satisfy IItemValidating
 
 
         public List<string> Validate()

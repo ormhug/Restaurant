@@ -10,6 +10,10 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
 
+        public string UniqueImportId => $"R{Id}";
+
+        public string ImagePath { get; set; } = string.Empty;
+
         // 1. Поле Status (обязательно по критериям) [cite: 47]
         // Устанавливаем статус 'pending' по умолчанию (в Factory) [cite: 66]
         public string Status { get; set; } = string.Empty;
@@ -56,5 +60,6 @@ namespace Domain.Entities
 
             return errors;
         }
+
     }
 }
