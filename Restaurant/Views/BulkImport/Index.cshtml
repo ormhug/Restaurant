@@ -1,0 +1,33 @@
+﻿@* Views/BulkImport/Index.cshtml *@
+@{
+    ViewData["Title"] = "Bulk Import: Step 1";
+}
+
+<div class="container mt-5">
+    <h2>Step 1: Upload JSON File</h2>
+    <p class="lead">Upload your JSON file to validate the data and prepare it for the commit stage.</p>
+
+    <hr />
+
+    @* The form posts the file to the BulkImport (HttpPost) method *@
+    <form asp-action="BulkImport" asp-controller="BulkImport" method="post" enctype="multipart/form-data">
+
+        <div class="form-group mb-3">
+            <label for="jsonFile" class="form-label">Select JSON File:</label>
+            @* The name "jsonFile" must match the parameter in the BulkImport(IFormFile jsonFile) method *@
+            <input type="file" id="jsonFile" name="jsonFile" class="form-control" accept=".json" required />
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload and Download ZIP
+        </button>
+    </form>
+
+    <hr />
+
+    @* Instruction for redirection to Step 2 *@
+    <div class="alert alert-info mt-3">
+        <strong>Important:</strong> After clicking "Upload," a ZIP file will be downloaded. Once the download is complete, please proceed to <a href="/BulkImport/Preview">Step 2 (Preview)</a> to review your data and upload images.
+    </div>
+
+</div>

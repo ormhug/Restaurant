@@ -1,0 +1,53 @@
+﻿@* Views/BulkImport/Preview.cshtml *@
+@{
+    ViewData["Title"] = "Import Preview and Commit";
+}
+
+<div class="container mt-5">
+
+    <div class="row">
+        <div class="col-12">
+            <h2>Import Confirmation (Step 2 of 2)</h2>
+            <p class="lead">Below are all valid items (restaurants and menu items) ready for commit to the database.</p>
+            <p>To add images, please re-upload the ZIP archive you downloaded previously after replacing the `default.jpg` placeholders with your actual image files.</p>
+
+            <hr />
+        </div>
+    </div>
+
+    @* --- 1. FORM FOR COMMIT AND ZIP UPLOAD (AA4.3.4) --- *@
+
+    @* The form must be multipart/form-data to handle the IFormFile zipFile *@
+    <form asp-action="Commit" asp-controller="BulkImport" method="post" enctype="multipart/form-data">
+
+        <div class="row mb-4 bg-light p-3 border rounded">
+            <div class="col-md-8">
+                <div class="form-group">
+                    <label for="zipFile" class="form-label">Upload ZIP with Images (Optional)</label>
+                    <input type="file" id="zipFile" name="zipFile" class="form-control" accept=".zip" />
+                    <div class="form-text">
+                        Upload the edited ZIP file here. The maximum file size is determined by the server configuration.
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button type="submit" class="btn btn-success w-100">
+                    <i class="fas fa-database"></i> Save and Finalize (Commit)
+                </button>
+            </div>
+        </div>
+
+        @* --- 2. VIEW COMPONENT INVOCATION FOR PREVIEW (AA4.3.2) --- *@
+
+        <div class="row mt-4">
+            <div class="col-12">
+                <h3>Items ready to commit:</h3>
+
+                @* Invokes the View Component that reads data from the in-memory cache *@
+                @(await Component.InvokeAsync("ImportPreview"))
+            </div>
+        </div>
+
+    </form>
+
+</div>

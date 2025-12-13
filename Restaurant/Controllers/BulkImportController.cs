@@ -75,6 +75,13 @@ public class BulkImportController : Controller
         return View();
     }
 
+    [HttpGet] 
+    public IActionResult Index()
+    {
+        
+        return View();
+    }
+
     // AA4.3: Метод Commit (будет обновлен на следующем шаге для приема ZIP)
     [HttpPost]
     public async Task<IActionResult> Commit(

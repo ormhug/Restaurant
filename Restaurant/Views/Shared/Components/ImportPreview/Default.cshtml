@@ -17,10 +17,21 @@
 
         @foreach (var item in Model)
         {
-            // Здесь мы вызываем частичное представление, определенное в сущности через GetCardPartial()
-            <div class="col-md-6 mb-4">
-                @await Html.PartialAsync(item.GetCardPartial(), item)
-            </div>
+            // Проверяем, является ли элемент рестораном
+            if (item is Domain.Entities.Restaurant restaurant)
+            {
+                // ИЗМЕНЕНИЕ: Указываем полный путь к частичному представлению
+                // До: @await Html.PartialAsync("_RestaurantCardPartial", restaurant)
+                await Html.PartialAsync("~/Views/Items/_RestaurantCardPartial.cshtml", restaurant);
+            }
+            else if (item is Domain.Entities.MenuItem menuItem)
+            {
+                // Если у вас есть частичное представление для MenuItem, измените и его
+                // await Html.PartialAsync("~/Views/Items/_MenuItemCardPartial.cshtml", menuItem);
+
+                // Пока просто отобразим его, если вы не создавали _MenuItemCardPartial
+                <p>Меню: @menuItem.Title - @menuItem.Price.ToString("C")</p>
+            }
         }
 
         <div class="col-12 mt-4">

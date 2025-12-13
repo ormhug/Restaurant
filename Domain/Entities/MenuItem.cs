@@ -18,7 +18,7 @@ namespace Domain.Entities
 
         public Guid Id { get; set; }
 
-        public string UniqueImportId => $"M{Id:N}";
+        public string UniqueImportId { get; set; } = string.Empty;
 
         // 1. Поле Status (обязательно по критериям) [cite: 50]
         // Устанавливаем статус 'pending' по умолчанию (в Factory) [cite: 66]

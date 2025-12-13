@@ -86,7 +86,8 @@ namespace Domain
                     OwnerEmailAddress = dto.OwnerEmailAddress!,
                     Address = dto.Address ?? string.Empty,
                     Phone = dto.Phone ?? string.Empty,
-                    Status = DefaultStatus
+                    Status = DefaultStatus,
+                    UniqueImportId = dto.Id.Replace("-", "")
                 };
                 itemsToSave.Add(restaurant);
 
@@ -100,7 +101,8 @@ namespace Domain
                         Price = menuItemDto.Price,
                         Currency = menuItemDto.Currency ?? "EUR",
                         Status = DefaultStatus,
-                        Restaurant = restaurant
+                        Restaurant = restaurant,
+                        UniqueImportId = (menuItemDto.Id ?? Guid.NewGuid().ToString()).Replace("-", "")
                     };
                     restaurant.MenuItems.Add(menuItem);
                     itemsToSave.Add(menuItem);

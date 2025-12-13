@@ -10,7 +10,7 @@ namespace Domain.Entities
     {
         public int Id { get; set; }
 
-        public string UniqueImportId => $"R{Id}";
+        public string UniqueImportId { get; set; } = string.Empty;
 
         public string ImagePath { get; set; } = string.Empty;
 
