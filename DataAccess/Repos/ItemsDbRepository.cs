@@ -1,6 +1,6 @@
 ﻿using Domain.Interfaces;
 using Domain.Entities;
-using DataAccess.Context; // Ссылка на ApplicationDbContext
+using DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,37 +17,22 @@ namespace DataAccess
             _context = context;
         }
 
-        // Метод GET (AA2.3.2, AA4.3.6)
-        // Получает все элементы, опционально фильтруя по Approved статусу
+        // Метод GET (Оставляем без изменений, он работает корректно для чтения)
         public async Task<IEnumerable<IItemValidating>> GetAsync(bool onlyApproved = false)
         {
-            IQueryable<IItemValidating> query = _context.Restaurants
-                // Загружаем связанные MenuItems, чтобы получить OwnerEmailAddress для валидации
-                .Include(r => r.MenuItems);
-
-            if (onlyApproved)
-            {
-                // Фильтруем только одобренные элементы (Status == "Approved")
-                query = query.Where(i => i.Status == "Approved");
-            }
-
-            // Поскольку мы запрашиваем IItemValidating, 
-            // нам нужно объединить Restaurants и MenuItems.
-            // EF Core не может объединить два DbSet'а в один IItemValidating на стороне БД,
-            // поэтому мы получим их по отдельности и объединим в памяти.
-
-            // 1. Получаем рестораны (их Status уже в таблице Restaurants)
+            // 1. Получаем рестораны
             var restaurants = await _context.Restaurants
+                .Include(r => r.MenuItems)
                 .Where(r => !onlyApproved || r.Status == "Approved")
                 .ToListAsync();
 
-            // 2. Получаем меню-элементы (их Status уже в таблице MenuItems)
+            // 2. Получаем меню-элементы
             var menuItems = await _context.MenuItems
-                .Include(mi => mi.Restaurant) // Включаем родительский ресторан для GetValidators()
+                .Include(mi => mi.Restaurant)
                 .Where(mi => !onlyApproved || mi.Status == "Approved")
                 .ToListAsync();
 
-            // Объединяем их в единый список IItemValidating
+            // Объединяем их
             var allItems = new List<IItemValidating>();
             allItems.AddRange(restaurants);
             allItems.AddRange(menuItems);
@@ -55,35 +40,26 @@ namespace DataAccess
             return allItems;
         }
 
-        // Метод SAVE (AA2.3.2, AA4.3.5)
-        // Сохраняет список элементов, которые были импортированы через Factory
+        // --- ИСПРАВЛЕННЫЙ МЕТОД SAVE ---
         public async Task SaveAsync(IEnumerable<IItemValidating> items)
         {
-            // Разделяем коллекцию на рестораны и меню-элементы
-            var restaurants = items.OfType<Restaurant>().ToList();
-            var menuItems = items.OfType<MenuItem>().ToList();
+            // ИСПРАВЛЕНИЕ:
+            // Мы отбираем только родительские объекты (Рестораны).
+            // Пункты меню (MenuItems) находятся внутри свойства restaurant.MenuItems.
+            var parentsOnly = items.OfType<Restaurant>().ToList();
 
-            // 1. Сохраняем рестораны
-            _context.Restaurants.AddRange(restaurants);
-            await _context.SaveChangesAsync();
+            // Мы добавляем в контекст только родителей.
+            // EF Core "умный": он увидит вложенные MenuItems и автоматически добавит их в БД,
+            // сгенерировав правильные ID и связи.
+            await _context.Restaurants.AddRangeAsync(parentsOnly);
 
-            // 2. Сохраняем меню-элементы
-            // Здесь может быть проблема, если RestaurantId в MenuItem еще не обновлен 
-            // (т.к. Restaurant.Id был сгенерирован БД).
-            // В идеале, Factory должен обновить RestaurantId для MenuItems после 
-            // сохранения родительских Restaurant, но сейчас EF Core должен 
-            // сам разрешить эту связь, если все настроено правильно.
-            _context.MenuItems.AddRange(menuItems);
+            // Сохраняем все одной транзакцией.
             await _context.SaveChangesAsync();
         }
 
-        // Метод APPROVE (SE3.3.3)
-        // Обновляет статус элемента(ов)
+        // Метод APPROVE (Оставляем без изменений)
         public async Task ApproveAsync(IEnumerable<int> itemIds)
         {
-            // Этот метод нуждается в более сложной логике, так как ID бывают разных типов (int и Guid).
-            // Для простоты (и для выполнения критерия SE3.3.3) предположим, что itemIds - это int ID ресторанов.
-
             var itemsToApprove = await _context.Restaurants
                 .Where(r => itemIds.Contains(r.Id))
                 .ToListAsync();
@@ -94,14 +70,11 @@ namespace DataAccess
             }
 
             await _context.SaveChangesAsync();
-
-            // В реальном приложении здесь должна быть логика для одобрения MenuItems по их Guid ID
         }
 
-        // Метод CLEAR (AA2.3.2) - не используется в DbRepository
         public void Clear()
         {
-            // Этот метод не должен делать ничего в постоянном хранилище
+            // Не используется для БД
         }
     }
 }

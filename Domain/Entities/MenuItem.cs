@@ -29,7 +29,7 @@ namespace Domain.Entities
         public string Currency { get; set; } = "EUR";
 
         public int RestaurantId { get; set; }
-        public Restaurant Restaurant { get; set; } = null!;
+        public Restaurant? Restaurant { get; set; } 
 
         // Реализация GetValidators(): MenuItem одобряет Владелец Ресторана 
         public List<string> GetValidators()
