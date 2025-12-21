@@ -2,6 +2,7 @@
 using Domain.Entities;
 using DataAccess.Context;
 using Microsoft.EntityFrameworkCore;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,90 +18,48 @@ namespace DataAccess
             _context = context;
         }
 
-        // Метод GET (Оставляем без изменений, он работает корректно для чтения)
+        // --- ИСПРАВЛЕННЫЙ GET (Только рестораны) ---
         public async Task<IEnumerable<IItemValidating>> GetAsync(bool onlyApproved = false)
         {
-            // 1. Получаем рестораны
-            var restaurants = await _context.Restaurants
-                .Include(r => r.MenuItems)
-                .Where(r => !onlyApproved || r.Status == "Approved")
-                .ToListAsync();
+            // Начинаем запрос к ресторанам
+            // Include(r => r.MenuItems) подгружает меню, чтобы оно было доступно внутри
+            var query = _context.Restaurants
+                                .Include(r => r.MenuItems)
+                                .AsQueryable();
 
-            // 2. Получаем меню-элементы
-            var menuItems = await _context.MenuItems
-                .Include(mi => mi.Restaurant)
-                .Where(mi => !onlyApproved || mi.Status == "Approved")
-                .ToListAsync();
+            // Если просят только одобренные (для Гостей) - фильтруем
+            if (onlyApproved)
+            {
+                query = query.Where(r => r.Status == "Approved");
+            }
 
-            // Объединяем их
-            var allItems = new List<IItemValidating>();
-            allItems.AddRange(restaurants);
-            allItems.AddRange(menuItems);
+            // Выполняем запрос
+            var restaurants = await query.ToListAsync();
 
-            return allItems;
+            // Возвращаем как список IItemValidating
+            // (Пункты меню не добавляем отдельно, они лежат внутри ресторанов)
+            return restaurants.Cast<IItemValidating>();
         }
 
-        // --- ИСПРАВЛЕННЫЙ МЕТОД SAVE ---
         public async Task SaveAsync(IEnumerable<IItemValidating> items)
         {
-            // ИСПРАВЛЕНИЕ:
-            // Мы отбираем только родительские объекты (Рестораны).
-            // Пункты меню (MenuItems) находятся внутри свойства restaurant.MenuItems.
-            var parentsOnly = items.OfType<Restaurant>().ToList();
+            // Берем только Рестораны (родительские объекты).
+            // EF Core сам сохранит вложенные MenuItems, так как они находятся внутри свойства Restaurant.MenuItems
+            var restaurants = items.OfType<Restaurant>().ToList();
 
-            // Мы добавляем в контекст только родителей.
-            // EF Core "умный": он увидит вложенные MenuItems и автоматически добавит их в БД,
-            // сгенерировав правильные ID и связи.
-            await _context.Restaurants.AddRangeAsync(parentsOnly);
-
-            // Сохраняем все одной транзакцией.
+            await _context.Restaurants.AddRangeAsync(restaurants);
             await _context.SaveChangesAsync();
         }
 
-        // Метод APPROVE (Оставляем без изменений)
-        public async Task ApproveAsync(IEnumerable<int> itemIds)
-        {
-            var itemsToApprove = await _context.Restaurants
-                .Where(r => itemIds.Contains(r.Id))
-                .ToListAsync();
-
-            foreach (var item in itemsToApprove)
-            {
-                item.Status = "Approved";
-            }
-
-            await _context.SaveChangesAsync();
-        }
-
-        public void Clear()
-        {
-            // Не используется для БД
-        }
-
-        public async Task DeleteAsync(int id)
-        {
-            // 1. Ищем ресторан по ID
-            var item = await _context.Restaurants.FindAsync(id);
-
-            // 2. Если нашли — удаляем
-            if (item != null)
-            {
-                _context.Restaurants.Remove(item);
-
-                // Сохраняем изменения. 
-                // Примечание: Если в БД настроено каскадное удаление (Cascade Delete), 
-                // то меню удалится автоматически.
-                await _context.SaveChangesAsync();
-            }
-        }
+        // --- МЕТОДЫ ОДОБРЕНИЯ ---
 
         public async Task ApproveAsync(int id)
         {
             var item = await _context.Restaurants.FindAsync(id);
             if (item != null)
             {
-                item.Status = "Approved"; // Меняем статус
-                await _context.SaveChangesAsync(); // Сохраняем в БД
+                item.Status = "Approved";
+                await _context.SaveChangesAsync();
             }
         }
 
@@ -114,12 +73,44 @@ namespace DataAccess
             }
         }
 
+        // --- ПОЛУЧЕНИЕ ПО ID (Для страницы Details) ---
         public async Task<Restaurant> GetRestaurantByIdAsync(int id)
         {
-            // Include делает "Left Join" - ресторан найдется, даже если MenuItems пустое
+            // Важно: Include гарантирует, что мы получим ресторан + его меню (даже если оно пустое)
             return await _context.Restaurants
                                  .Include(r => r.MenuItems)
                                  .FirstOrDefaultAsync(r => r.Id == id);
+        }
+
+        // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---
+
+        public async Task DeleteAsync(int id)
+        {
+            var item = await _context.Restaurants.FindAsync(id);
+            if (item != null)
+            {
+                _context.Restaurants.Remove(item);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public void Clear()
+        {
+            // Для БД не требуется, метод нужен только для In-Memory репозитория
+        }
+
+        // Метод ApproveAsync для списка (если используется где-то еще)
+        public async Task ApproveAsync(IEnumerable<int> itemIds)
+        {
+            var itemsToApprove = await _context.Restaurants
+                .Where(r => itemIds.Contains(r.Id))
+                .ToListAsync();
+
+            foreach (var item in itemsToApprove)
+            {
+                item.Status = "Approved";
+            }
+            await _context.SaveChangesAsync();
         }
     }
 }

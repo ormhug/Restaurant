@@ -18,10 +18,10 @@ namespace Restaurant.Controllers
         public async Task<IActionResult> Catalog([FromKeyedServices(DbKey)] IItemsRepository dbRepo)
         {
             // 1. Получаем все элементы
-            var allItems = await dbRepo.GetAsync(onlyApproved: false);
+            var items = await dbRepo.GetAsync(onlyApproved: true);
 
             // 2. ФИЛЬТР: Оставляем только Рестораны И ПРИВОДИМ К ОБЩЕМУ ТИПУ
-            var restaurantsOnly = allItems
+            var restaurantsOnly = items
                 .OfType<Domain.Entities.Restaurant>()       // Оставляем только рестораны
                 .Cast<Domain.Interfaces.IItemValidating>()  // <--- ДОБАВИТЬ ЭТУ СТРОКУ (приводим обратно к интерфейсу)
                 .ToList();
