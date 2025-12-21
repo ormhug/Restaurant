@@ -1,14 +1,13 @@
-// Program.cs
 using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using DataAccess;
 using Domain.Interfaces;
 using Services;
-using Microsoft.AspNetCore.Identity; // <--- ДОБАВЛЕНО: Для IdentityUser и IdentityRole
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- 1. Конфигурация Базы Данных ---
+//конфигурация бд
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -16,44 +15,42 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString,
         b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
 
-// --- 1.5. Конфигурация Identity (ВХОД И РЕГИСТРАЦИЯ) ---
-// ВАЖНО: Добавляем поддержку пользователей и ролей
+// конфигурация аутентификации и авторизации
+// поддержку пользователей и ролей
 builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
-    // Упрощаем требования к паролю для тестов (чтобы не придумывать сложные)
-    options.Password.RequireDigit = false;          // Не обязательно цифры
-    options.Password.RequiredLength = 4;            // Минимум 4 символа
-    options.Password.RequireNonAlphanumeric = false;// Не обязательно спецсимволы (!@#)
-    options.Password.RequireUppercase = false;      // Не обязательно заглавные
-    options.Password.RequireLowercase = false;      // Не обязательно строчные
+    // простые пароли для упрощения
+    options.Password.RequireDigit = false; // Не обязательно цифры
+    options.Password.RequiredLength = 4;            
+    options.Password.RequireNonAlphanumeric = false; // Не обязательно спецсимволы (!@#)
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
 })
-.AddEntityFrameworkStores<ApplicationDbContext>() // Храним пользователей в нашей БД
+.AddEntityFrameworkStores<ApplicationDbContext>() //юзеры в бд
 .AddDefaultTokenProviders();
 
 
-// --- 2. Конфигурация Кэша ---
+// конфигурация кеша
 builder.Services.AddMemoryCache();
 
 
-// --- 3. Регистрация Keyed Services (AA2.3.2) ---
+//регистрация keyed services
 const string InMemoryKey = "InMemory";
 const string DbKey = "Database";
 
-// 3.1. Регистрация ItemsInMemoryRepository
+
 builder.Services.AddKeyedScoped<IItemsRepository, ItemsInMemoryRepository>(InMemoryKey);
 
-// 3.2. Регистрация ItemsDbRepository
 builder.Services.AddKeyedScoped<IItemsRepository, ItemsDbRepository>(DbKey);
 
 
-// --- 4. Регистрация Сервисов и MVC ---
+// регистрация mvc и сервисов
 builder.Services.AddScoped<IZipService, ZipService>();
 builder.Services.AddControllersWithViews();
 
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -65,10 +62,10 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
-// --- ВАЖНО: ПОРЯДОК ИМЕЕТ ЗНАЧЕНИЕ ---
+// ПОРЯДОК ИМЕЕТ СМЫСЛ
 // Сначала проверяем КТО ЭТО (Authentication),
 // потом проверяем ЧТО ЕМУ МОЖНО (Authorization).
-app.UseAuthentication(); // <--- ДОБАВЛЕНО
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

@@ -11,41 +11,40 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Restaurant.styles.css" asp-append-version="true" />
-    @* Добавляем FontAwesome для иконок (по желанию) *@
+    @*для иконок *@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>
         <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid px-4">
-                @* БРЕНД СЛЕВА *@
+                @*просто название слева *@
                 <a class="navbar-brand fw-bold" asp-area="" asp-controller="Items" asp-action="Catalog">Restaurant</a>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
-                @* КНОПКИ СПРАВА *@
+                @*кнопки справа *@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
                     <ul class="navbar-nav align-items-center">
 
                         @if (SignInManager.IsSignedIn(User))
                         {
-                            @* --- ЕСЛИ ПОЛЬЗОВАТЕЛЬ ВОШЕЛ --- *@
+                            @*если юзер вошел*@
 
-                            @* 1. Кнопка Verification *@
+                            @*кнопка Verification *@
                             <li class="nav-item me-2">
                                 <a class="btn btn-outline-warning" asp-controller="Items" asp-action="Verification">
                                     <i class="fas fa-tasks"></i> Verification
                                 </a>
                             </li>
 
-                            @* 2. Приветствие *@
                             <li class="nav-item me-3">
                                 <span class="text-dark fw-bold">Hello, @User.Identity?.Name!</span>
                             </li>
 
-                            @* 3. Кнопка Logout *@
+                            @*кнопка Logout *@
                             <li class="nav-item">
                                 <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
                                     <button type="submit" class="btn btn-outline-danger">Logout</button>
@@ -54,13 +53,13 @@
                         }
                         else
                         {
-                            @* --- ЕСЛИ ГОСТЬ --- *@
+                            @*если гость  *@
                             <li class="nav-item me-2">
                                 <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Auth">Login / Register</a>
                             </li>
                         }
 
-                        @* Кнопка добавления ресторана (всегда видна) *@
+                        @*кнопка для добавления  рестика*@
                         <li class="nav-item ms-2">
                             <a class="btn btn-primary" asp-controller="BulkImport" asp-action="Index">Add New Restaurant</a>
                         </li>

@@ -1,6 +1,4 @@
-﻿// Domain/ImportItemFactory.cs
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -13,7 +11,7 @@ namespace Domain
 {
     public static class ImportItemFactory
     {
-        // Внутренний вспомогательный DTO для парсинга типа
+
         private class ItemBaseDto { public string? Type { get; set; } }
 
         public static async Task<IEnumerable<IItemValidating>> CreateAsync(Stream jsonStream)
@@ -23,7 +21,7 @@ namespace Domain
                 return new List<IItemValidating>();
             }
 
-            // Читаем весь JSON как массив объектов-заглушек для определения типа
+            // Читает весь json как массив объектов-заглушек для определения типа
             var rawElements = await JsonSerializer.DeserializeAsync<List<JsonElement>>(
                 jsonStream,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true }
@@ -34,7 +32,7 @@ namespace Domain
             var itemsToSave = new List<IItemValidating>();
              const string DefaultStatus = "Pending"; 
 
-            // Словарь для временного хранения DTO-ресторанов по их ID (например, "R-1001")
+            // Словарь для временного хранения DTO-ресторанов по их ID (например R-1001)
             var restaurantDtos = new Dictionary<string, ImportRestaurantDto>();
 
             // 1. Десериализация
@@ -58,7 +56,7 @@ namespace Domain
                         var dto = JsonSerializer.Deserialize<ImportMenuItemDto>(jsonString, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                         if (dto != null)
                         {
-                            // Добавляем menuItem к списку меню ресторана (будет использоваться на следующем шаге)
+                            // Добавляем menuItem к списку меню ресторана
                             if (dto.RestaurantId != null)
                             {
                                 if (!restaurantDtos.ContainsKey(dto.RestaurantId))

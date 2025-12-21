@@ -13,7 +13,6 @@ public class ImportRestaurantDto
     // Иерархия: список позиций меню внутри ресторана
     public List<ImportMenuItemDto> MenuItems { get; set; } = new List<ImportMenuItemDto>();
 
-    // Дополнительные поля, которые были в вашем DTO, но могут быть не нужны для импорта:
     public string? Description { get; set; }
     public string? Address { get; set; }
     public string? Phone { get; set; }
