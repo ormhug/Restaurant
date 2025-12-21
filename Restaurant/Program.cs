@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using DataAccess.Context;
 using DataAccess;
 using Domain.Interfaces;
-using Services; // Используем правильное пространство имен для ZipService
+using Services;
+using Microsoft.AspNetCore.Identity; // <--- ДОБАВЛЕНО: Для IdentityUser и IdentityRole
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,16 +14,28 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString,
-        // Указываем, где находится ApplicationDbContext для миграций
         b => b.MigrationsAssembly(typeof(ApplicationDbContext).Assembly.FullName)));
+
+// --- 1.5. Конфигурация Identity (ВХОД И РЕГИСТРАЦИЯ) ---
+// ВАЖНО: Добавляем поддержку пользователей и ролей
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+{
+    // Упрощаем требования к паролю для тестов (чтобы не придумывать сложные)
+    options.Password.RequireDigit = false;          // Не обязательно цифры
+    options.Password.RequiredLength = 4;            // Минимум 4 символа
+    options.Password.RequireNonAlphanumeric = false;// Не обязательно спецсимволы (!@#)
+    options.Password.RequireUppercase = false;      // Не обязательно заглавные
+    options.Password.RequireLowercase = false;      // Не обязательно строчные
+})
+.AddEntityFrameworkStores<ApplicationDbContext>() // Храним пользователей в нашей БД
+.AddDefaultTokenProviders();
+
 
 // --- 2. Конфигурация Кэша ---
 builder.Services.AddMemoryCache();
 
 
 // --- 3. Регистрация Keyed Services (AA2.3.2) ---
-
-// Определяем ключи для использования в контроллерах:
 const string InMemoryKey = "InMemory";
 const string DbKey = "Database";
 
@@ -34,11 +47,7 @@ builder.Services.AddKeyedScoped<IItemsRepository, ItemsDbRepository>(DbKey);
 
 
 // --- 4. Регистрация Сервисов и MVC ---
-
-// Регистрация ZipService (он инжектирует IWebHostEnvironment, который зарегистрирован автоматически)
 builder.Services.AddScoped<IZipService, ZipService>();
-
-// Добавление других сервисов (MVC/Razor Pages). Удалили дубликат!
 builder.Services.AddControllersWithViews();
 
 
@@ -52,14 +61,18 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles(); // ВАЖНО: Разрешает доступ к wwwroot для изображений
+app.UseStaticFiles();
 
 app.UseRouting();
 
+// --- ВАЖНО: ПОРЯДОК ИМЕЕТ ЗНАЧЕНИЕ ---
+// Сначала проверяем КТО ЭТО (Authentication),
+// потом проверяем ЧТО ЕМУ МОЖНО (Authorization).
+app.UseAuthentication(); // <--- ДОБАВЛЕНО
 app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}");
+    pattern: "{controller=Items}/{action=Catalog}/{id?}");
 
 app.Run();

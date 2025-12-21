@@ -3,7 +3,7 @@ using Domain.Entities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Caching.Memory; // Нам понадобится IMemoryCache
+using Microsoft.Extensions.Caching.Memory;
 
 namespace DataAccess
 {
@@ -53,5 +53,44 @@ namespace DataAccess
         {
             _items.Clear();
         }
+
+        public Task DeleteAsync(int id)
+        {
+            // Ищем элемент в списке памяти
+            // (Нам нужно проверить, является ли элемент рестораном и совпадает ли ID)
+            var itemToRemove = _items.FirstOrDefault(i =>
+                i is Domain.Entities.Restaurant r && r.Id == id);
+
+            if (itemToRemove != null)
+            {
+                _items.Remove(itemToRemove);
+            }
+
+            // Возвращаем завершенную задачу (т.к. метод асинхронный, но работаем мы в памяти)
+            return Task.CompletedTask;
+        }
+
+        public Task ApproveAsync(int id)
+        {
+            // Находим в памяти и меняем статус
+            var item = _items.OfType<Domain.Entities.Restaurant>().FirstOrDefault(r => r.Id == id);
+            if (item != null)
+            {
+                item.Status = "Approved";
+            }
+            return Task.CompletedTask;
+        }
+
+        public Task ApproveMenuAsync(Guid id)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Restaurant> GetRestaurantByIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+     
     }
 }

@@ -76,5 +76,50 @@ namespace DataAccess
         {
             // Не используется для БД
         }
+
+        public async Task DeleteAsync(int id)
+        {
+            // 1. Ищем ресторан по ID
+            var item = await _context.Restaurants.FindAsync(id);
+
+            // 2. Если нашли — удаляем
+            if (item != null)
+            {
+                _context.Restaurants.Remove(item);
+
+                // Сохраняем изменения. 
+                // Примечание: Если в БД настроено каскадное удаление (Cascade Delete), 
+                // то меню удалится автоматически.
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task ApproveAsync(int id)
+        {
+            var item = await _context.Restaurants.FindAsync(id);
+            if (item != null)
+            {
+                item.Status = "Approved"; // Меняем статус
+                await _context.SaveChangesAsync(); // Сохраняем в БД
+            }
+        }
+
+        public async Task ApproveMenuAsync(Guid id)
+        {
+            var item = await _context.MenuItems.FindAsync(id);
+            if (item != null)
+            {
+                item.Status = "Approved";
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        public async Task<Restaurant> GetRestaurantByIdAsync(int id)
+        {
+            // Include делает "Left Join" - ресторан найдется, даже если MenuItems пустое
+            return await _context.Restaurants
+                                 .Include(r => r.MenuItems)
+                                 .FirstOrDefaultAsync(r => r.Id == id);
+        }
     }
 }

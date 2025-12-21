@@ -1,4 +1,8 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Identity
+@inject SignInManager<IdentityUser> SignInManager
+@inject UserManager<IdentityUser> UserManager
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -7,29 +11,65 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Restaurant.styles.css" asp-append-version="true" />
+    @* Добавляем FontAwesome для иконок (по желанию) *@
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Restaurant</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+            <div class="container-fluid px-4">
+                @* БРЕНД СЛЕВА *@
+                <a class="navbar-brand fw-bold" asp-area="" asp-controller="Items" asp-action="Catalog">Restaurant</a>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+
+                @* КНОПКИ СПРАВА *@
+                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-end">
+                    <ul class="navbar-nav align-items-center">
+
+                        @if (SignInManager.IsSignedIn(User))
+                        {
+                            @* --- ЕСЛИ ПОЛЬЗОВАТЕЛЬ ВОШЕЛ --- *@
+
+                            @* 1. Кнопка Verification *@
+                            <li class="nav-item me-2">
+                                <a class="btn btn-outline-warning" asp-controller="Items" asp-action="Verification">
+                                    <i class="fas fa-tasks"></i> Verification
+                                </a>
+                            </li>
+
+                            @* 2. Приветствие *@
+                            <li class="nav-item me-3">
+                                <span class="text-dark fw-bold">Hello, @User.Identity?.Name!</span>
+                            </li>
+
+                            @* 3. Кнопка Logout *@
+                            <li class="nav-item">
+                                <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                                    <button type="submit" class="btn btn-outline-danger">Logout</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            @* --- ЕСЛИ ГОСТЬ --- *@
+                            <li class="nav-item me-2">
+                                <a class="btn btn-outline-dark" asp-controller="Account" asp-action="Auth">Login / Register</a>
+                            </li>
+                        }
+
+                        @* Кнопка добавления ресторана (всегда видна) *@
+                        <li class="nav-item ms-2">
+                            <a class="btn btn-primary" asp-controller="BulkImport" asp-action="Index">Add New Restaurant</a>
                         </li>
                     </ul>
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()

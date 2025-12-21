@@ -35,7 +35,7 @@ namespace Domain.Entities
         public List<string> GetValidators()
         {
             // Возвращаем email владельца связанного ресторана
-            if (Restaurant != null)
+            if (Restaurant != null && !string.IsNullOrEmpty(Restaurant.OwnerEmailAddress))
             {
                 return new List<string> { Restaurant.OwnerEmailAddress };
             }
@@ -65,6 +65,11 @@ namespace Domain.Entities
             }
 
             return errors;
+        }
+
+        public string GetId()
+        {
+            return Id.ToString();
         }
     }
 }

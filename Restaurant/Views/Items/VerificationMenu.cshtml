@@ -1,0 +1,41 @@
+﻿@model List<Domain.Entities.MenuItem>
+
+<div class="container mt-4">
+    <h3>Pending Items for: <span class="text-primary">@ViewBag.RestaurantName</span></h3>
+
+    @* ИСПРАВЛЕННАЯ ССЫЛКА: ведет на метод Verification *@
+    <a asp-action="Verification" class="btn btn-link mb-3">&larr; Back to My Restaurants</a>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success">All menu items are approved!</div>
+    }
+    else
+    {
+        <table class="table table-bordered bg-white">
+            <thead class="table-light">
+                <tr>
+                    <th>Item</th>
+                    <th>Price</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Title</td>
+                        <td>@item.Price @item.Currency</td>
+                        <td>
+                            @* МЕНЯЕМ asp-action НА ApproveMenuItem *@
+                            <form asp-action="ApproveMenuItem" method="post">
+                                <input type="hidden" name="id" value="@item.Id" />
+                                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

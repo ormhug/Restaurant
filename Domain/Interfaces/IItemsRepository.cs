@@ -24,5 +24,11 @@ namespace Domain.Interfaces
 
         // CLEAR: Очищает хранилище (используется для InMemoryCache)
         void Clear();
+
+        Task DeleteAsync(int id);
+
+        Task ApproveAsync(int id);
+        Task ApproveMenuAsync(Guid id);
+        Task<Restaurant> GetRestaurantByIdAsync(int id);
     }
 }

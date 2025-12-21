@@ -31,7 +31,7 @@ namespace Domain.Entities
         {
             // Email Site Admin должен быть загружен из настроек (appsettings.json)
             // Пока используем заглушку, которую позже заменим конфигурацией.
-            return new List<string> { "site.admin@enterprise.com" };
+            return new List<string> { "admin@test.com" };
         }
 
         // Реализация GetCardPartial(): Возвращает имя Partial View [cite: 54]
@@ -59,6 +59,11 @@ namespace Domain.Entities
             }
 
             return errors;
+        }
+
+        public string GetId()
+        {
+            return Id.ToString();
         }
 
     }

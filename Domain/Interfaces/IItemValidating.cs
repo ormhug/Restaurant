@@ -24,6 +24,6 @@ namespace Domain.Interfaces
 
         string UniqueImportId { get; }
 
-
+        string GetId();
     }
 }

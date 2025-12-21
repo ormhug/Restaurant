@@ -1,0 +1,105 @@
+﻿@model Restaurant.Models.AuthViewModel
+
+@{
+    ViewData["Title"] = "Authentication";
+
+    // --- ЛОГИКА АКТИВНОЙ ВКЛАДКИ ---
+    // Если контроллер передал "register", открываем его. Иначе - "login".
+    var activeTab = ViewData["ActiveTab"] as string ?? "login";
+
+    // Классы для кнопок
+    var loginClass = activeTab == "login" ? "active" : "";
+    var registerClass = activeTab == "register" ? "active" : "";
+
+    // Классы для содержимого (самих форм)
+    var loginShow = activeTab == "login" ? "show active" : "";
+    var registerShow = activeTab == "register" ? "show active" : "";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+
+                @* --- ЗАГОЛОВОК С ВКЛАДКАМИ --- *@
+                <div class="card-header bg-white p-0">
+                    <ul class="nav nav-tabs nav-fill" id="authTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            @* ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ @loginClass *@
+                            <button class="nav-link fw-bold @loginClass" id="login-tab" data-bs-toggle="tab" data-bs-target="#login" type="button" role="tab">Login</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            @* ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ @registerClass *@
+                            <button class="nav-link fw-bold @registerClass" id="register-tab" data-bs-toggle="tab" data-bs-target="#register" type="button" role="tab">Register</button>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="card-body p-4">
+                    <div class="tab-content" id="authTabContent">
+
+                        @* --- Вкладка 1: LOGIN --- *@
+                        @* ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ @loginShow *@
+                        <div class="tab-pane fade @loginShow" id="login" role="tabpanel">
+                            <form asp-action="Login" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Login.Email" class="form-label">Email address</label>
+                                    <input asp-for="Login.Email" class="form-control" placeholder="name@example.com" />
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Login.Password" class="form-label">Password</label>
+                                    <input asp-for="Login.Password" class="form-control" placeholder="Your password" />
+                                </div>
+
+                                <div class="mb-3 form-check">
+                                    <input asp-for="Login.RememberMe" class="form-check-input" />
+                                    <label asp-for="Login.RememberMe" class="form-check-label">Remember me</label>
+                                </div>
+
+                                <button type="submit" class="btn btn-primary w-100">Sign In</button>
+                            </form>
+                        </div>
+
+                        @* --- Вкладка 2: REGISTER --- *@
+                        @* ИСПОЛЬЗУЕМ ПЕРЕМЕННУЮ @registerShow *@
+                        <div class="tab-pane fade @registerShow" id="register" role="tabpanel">
+                            <form asp-action="Register" method="post">
+                                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Register.Email" class="form-label">Email address</label>
+                                    <input asp-for="Register.Email" class="form-control" />
+                                    <span asp-validation-for="Register.Email" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Register.Password" class="form-label">Password</label>
+                                    <input asp-for="Register.Password" class="form-control" />
+                                    <span asp-validation-for="Register.Password" class="text-danger small"></span>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label asp-for="Register.ConfirmPassword" class="form-label">Confirm Password</label>
+                                    <input asp-for="Register.ConfirmPassword" class="form-control" />
+                                    <span asp-validation-for="Register.ConfirmPassword" class="text-danger small"></span>
+                                </div>
+
+                                <button type="submit" class="btn btn-outline-primary w-100">Create Account</button>
+                            </form>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

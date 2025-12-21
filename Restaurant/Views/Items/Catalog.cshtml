@@ -3,26 +3,41 @@
     ViewData["Title"] = "Items Catalog";
 }
 
-<h1> Catalog:</h1>
-
-<p>All items in database.</p>
-
-@if (Model == null || !Model.Any())
-{
-    <div class="alert alert-warning">
-        Catalog is empty. Import and commit data using Bulk Import.
+<div class="container-fluid px-4 mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Restaurants</h2>
+        <span class="text-muted">Total: @Model.Count()</span>
     </div>
-}
-else
-{
-    <div class="row">
-        @foreach (var item in Model)
-        {
-            // Используем метод GetCardPartial() для отображения карточки.
-            // Это требование AA4.3.5, которое мы реализуем через View Component,
-            // но пока для простоты вызовем частичное представление напрямую.
-            // ПРИМЕЧАНИЕ: На следующем этапе, возможно, потребуется заменить это на View Component.
-            await Html.PartialAsync(item.GetCardPartial(), item);
-        }
-    </div>
-}
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="alert alert-warning text-center p-5">
+            <h4>Catalog is empty</h4>
+            <p>Please add new restaurants using the button above.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var item in Model)
+            {
+                // col-12 (телефон: 1 в ряд)
+                // col-md-6 (планшет: 2 в ряд)
+                // col-lg-3 (ноутбук/десктоп: 4 в ряд)
+                <div class="col-12 col-md-6 col-lg-3 mb-4">
+
+                    @* Отображаем саму карточку (картинка, название, описание) *@
+                    @await Html.PartialAsync(item.GetCardPartial(), (object)item)
+
+                    @* Большая кнопка внизу *@
+                    <div class="card-footer bg-white border-top-0">
+                        @* ВАЖНО: Добавлены скобки () в GetId() *@
+                        <a asp-action="Details" asp-route-id="@item.GetId()" class="btn btn-primary w-100">
+                            View Menu &raquo;
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

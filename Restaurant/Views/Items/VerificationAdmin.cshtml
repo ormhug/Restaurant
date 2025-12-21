@@ -1,0 +1,66 @@
+﻿@model List<Domain.Entities.Restaurant>
+
+@{
+    ViewData["Title"] = "Admin Verification";
+}
+
+<div class="container mt-4">
+    <h2 class="text-danger mb-3">
+        <i class="fas fa-user-shield"></i> Admin Verification Panel
+    </h2>
+    <p class="text-muted">Here are the restaurants waiting for your approval.</p>
+
+    @if (!Model.Any())
+    {
+        <div class="alert alert-success">
+            <i class="fas fa-check-circle"></i> No pending restaurants. Good job!
+        </div>
+    }
+    else
+    {
+        <div class="table-responsive">
+            <table class="table table-hover table-bordered shadow-sm bg-white">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Image</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td style="width: 100px;">
+                                @if (!string.IsNullOrEmpty(item.ImagePath))
+                                {
+                                    <img src="@item.ImagePath" alt="img" style="width: 80px; height: 60px; object-fit: cover; border-radius: 4px;">
+                                }
+                                else
+                                {
+                                    <span class="text-muted small">No Img</span>
+                                }
+                            </td>
+                            <td class="fw-bold">@item.Name</td>
+                            <td class="small text-muted">@item.Description</td>
+                            <td>
+                                <span class="badge bg-warning text-dark">@item.Status</span>
+                            </td>
+                            <td>
+                                @* КНОПКА APPROVE (Пока не работает, сделаем следующим шагом) *@
+                                <form asp-action="Approve" method="post">
+                                    <input type="hidden" name="id" value="@item.Id" />
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>
