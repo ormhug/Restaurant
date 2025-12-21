@@ -7,48 +7,45 @@ using Microsoft.Extensions.Caching.Memory;
 
 namespace DataAccess
 {
-    // В реальном приложении этот класс будет использовать IMemoryCache, 
-    // но для простоты мы начнем со статической коллекции, чтобы устранить ошибки.
+
     public class ItemsInMemoryRepository : IItemsRepository
     {
-        // Используем статическое хранилище, имитирующее кэш (IMemoryCache)
+        // статическое хранилище, имитирующее кэш (IMemoryCache)
         private static readonly List<IItemValidating> _items = new List<IItemValidating>();
 
-        // Конструктор, в который обычно инжектируется IMemoryCache
-        // public ItemsInMemoryRepository(IMemoryCache cache) { ... }
 
-        // Метод GET (AA2.3.2)
+
+        // Метод get
         public Task<IEnumerable<IItemValidating>> GetAsync(bool onlyApproved = false)
         {
             IEnumerable<IItemValidating> result = _items;
 
             if (onlyApproved)
             {
-                // Фильтрация по статусу "Approved"
+                // Фильтрация по статусу approved
                 result = _items.Where(i => i.Status == "Approved");
             }
 
             return Task.FromResult(result);
         }
 
-        // Метод SAVE (AA2.3.2)
+        // Метод save
         public Task SaveAsync(IEnumerable<IItemValidating> items)
         {
-            // Здесь мы имитируем "запись в кэш" - просто добавляем или перезаписываем список
+            // просто добавляем или перезаписываем список
             _items.Clear();
             _items.AddRange(items);
             return Task.CompletedTask;
         }
 
-        // Метод APPROVE (SE3.3.3)
+        // Метод approve
         public Task ApproveAsync(IEnumerable<int> itemIds)
         {
-            // Здесь должна быть логика поиска и обновления статуса
-            // (Сложно реализовать, пока все ID не станут int/Guid)
+
             return Task.CompletedTask;
         }
 
-        // Метод CLEAR (AA2.3.2)
+        // Метод clear
         public void Clear()
         {
             _items.Clear();
@@ -56,8 +53,7 @@ namespace DataAccess
 
         public Task DeleteAsync(int id)
         {
-            // Ищем элемент в списке памяти
-            // (Нам нужно проверить, является ли элемент рестораном и совпадает ли ID)
+            // поиск в памяти по id и удаление
             var itemToRemove = _items.FirstOrDefault(i =>
                 i is Domain.Entities.Restaurant r && r.Id == id);
 
@@ -66,7 +62,6 @@ namespace DataAccess
                 _items.Remove(itemToRemove);
             }
 
-            // Возвращаем завершенную задачу (т.к. метод асинхронный, но работаем мы в памяти)
             return Task.CompletedTask;
         }
 

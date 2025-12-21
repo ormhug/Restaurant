@@ -1,7 +1,7 @@
 ﻿@model Domain.Entities.Restaurant
 
 <div class="card h-100 shadow-sm border-0" style="border-radius: 12px; overflow: hidden;">
-    @* --- ИЗОБРАЖЕНИЕ --- *@
+    @* картинка *@
     <div style="height: 160px; background-color: #f8f9fa; display: flex; align-items: center; justify-content: center; overflow: hidden;">
         @if (!string.IsNullOrEmpty(Model.ImagePath))
         {
@@ -13,7 +13,7 @@
         }
     </div>
 
-    @* --- ТЕЛО КАРТОЧКИ --- *@
+    @* боди для карточки *@
     <div class="card-body">
         <div class="d-flex justify-content-between align-items-start mb-2">
             <h5 class="card-title fw-bold mb-0">@Model.Name</h5>
@@ -31,12 +31,12 @@
             @Model.Description
         </p>
 
-        @* АДРЕС *@
+        @* адрес *@
         <div class="small text-muted mb-1">
             <i class="fas fa-map-marker-alt me-1"></i> @Model.Address
         </div>
 
-        @* ТЕЛЕФОН *@
+        @* телефон *@
         @if (!string.IsNullOrEmpty(Model.Phone))
         {
             <div class="small text-muted">
@@ -45,13 +45,13 @@
         }
     </div>
 
-    @* --- ФУТЕР (Только кнопка Delete) --- *@
+    @*footer *@
     <div class="card-footer bg-white border-top-0 pb-3 pt-0">
-        @* Кнопка Delete *@
+        @* кнопка delete*@
         <form asp-controller="Items" asp-action="Delete" method="post"
               onsubmit="return confirm('Are you sure you want to delete this restaurant?');">
 
-            @* Передаем ID ресторана *@
+            @*передаем id restoran*@
             <input type="hidden" name="id" value="@Model.Id" />
 
             <button type="submit" class="btn btn-outline-danger btn-sm w-100" style="border-radius: 8px;">

@@ -33,13 +33,12 @@ namespace DataAccess.Context
                 .WithMany(r => r.MenuItems)
                 .HasForeignKey(mi => mi.RestaurantId);
 
-            // ИСПРАВЛЕНИЕ ПРЕДУПРЕЖДЕНИЯ ДЛЯ DECIMAL
+            
             modelBuilder.Entity<MenuItem>()
                 .Property(mi => mi.Price)
-                // Устанавливаем точность: 18 цифр всего, 2 после запятой (например, 1234567890123456.78)
                 .HasPrecision(18, 2);
 
-            // Добавьте это, если вы используете Id: guid для MenuItem, как мы обсуждали ранее
+            //  нужно для Id: guid для MenuItem
              modelBuilder.Entity<MenuItem>()
                  .Property(mi => mi.Id)
                  .ValueGeneratedOnAdd(); 

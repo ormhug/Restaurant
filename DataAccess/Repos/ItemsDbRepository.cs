@@ -18,10 +18,10 @@ namespace DataAccess
             _context = context;
         }
 
-        // --- ИСПРАВЛЕННЫЙ GET (Только рестораны) ---
+        // Только рестораны
         public async Task<IEnumerable<IItemValidating>> GetAsync(bool onlyApproved = false)
         {
-            // Начинаем запрос к ресторанам
+            //запрос к ресторанам
             // Include(r => r.MenuItems) подгружает меню, чтобы оно было доступно внутри
             var query = _context.Restaurants
                                 .Include(r => r.MenuItems)
@@ -33,25 +33,23 @@ namespace DataAccess
                 query = query.Where(r => r.Status == "Approved");
             }
 
-            // Выполняем запрос
+            
             var restaurants = await query.ToListAsync();
 
             // Возвращаем как список IItemValidating
-            // (Пункты меню не добавляем отдельно, они лежат внутри ресторанов)
             return restaurants.Cast<IItemValidating>();
         }
 
         public async Task SaveAsync(IEnumerable<IItemValidating> items)
         {
-            // Берем только Рестораны (родительские объекты).
-            // EF Core сам сохранит вложенные MenuItems, так как они находятся внутри свойства Restaurant.MenuItems
+            // Берем только Рестораны (родительские объекты). но меню уже находятся в restaurants.MenuItems
             var restaurants = items.OfType<Restaurant>().ToList();
 
             await _context.Restaurants.AddRangeAsync(restaurants);
             await _context.SaveChangesAsync();
         }
 
-        // --- МЕТОДЫ ОДОБРЕНИЯ ---
+        // для одобрения 
 
         public async Task ApproveAsync(int id)
         {
@@ -73,16 +71,16 @@ namespace DataAccess
             }
         }
 
-        // --- ПОЛУЧЕНИЕ ПО ID (Для страницы Details) ---
+        // метод получения ресторана по Id с меню. для details
         public async Task<Restaurant> GetRestaurantByIdAsync(int id)
         {
-            // Важно: Include гарантирует, что мы получим ресторан + его меню (даже если оно пустое)
+            //Include гарантирует, что мы получим ресторан + его меню (даже если оно пустое)
             return await _context.Restaurants
                                  .Include(r => r.MenuItems)
                                  .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        // --- ВСПОМОГАТЕЛЬНЫЕ МЕТОДЫ ---
+        // еще методы
 
         public async Task DeleteAsync(int id)
         {

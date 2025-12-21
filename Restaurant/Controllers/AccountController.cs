@@ -16,8 +16,7 @@ namespace Restaurant.Controllers
             _signInManager = signInManager;
         }
 
-        // GET: /Account/Auth
-        // Открывает страницу с двумя вкладками
+        // get /Account/Auth
         [HttpGet]
         public IActionResult Auth()
         {
@@ -25,18 +24,18 @@ namespace Restaurant.Controllers
             return View(model);
         }
 
-        // POST: /Account/Login
+        // post /Account/Login
         [HttpPost]
         public async Task<IActionResult> Login(AuthViewModel modelWrapper)
         {
             var model = modelWrapper.Login;
 
-            // 1. Очищаем ошибки, связанные с Регистрацией (они нам сейчас не важны)
+            // были странные ошибк поэтому просто убрал их
             ModelState.Remove("Register.Email");
             ModelState.Remove("Register.Password");
             ModelState.Remove("Register.ConfirmPassword");
 
-            // 2. Теперь проверяем валидацию
+            // проверка валидации
             if (ModelState.IsValid)
             {
                 var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, lockoutOnFailure: false);
@@ -47,22 +46,22 @@ namespace Restaurant.Controllers
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             }
 
-            // Если провал - возвращаем на вкладку Login
+            // if провал - возвращаем на вкладку Login
             ViewData["ActiveTab"] = "login";
             return View("Auth", modelWrapper);
         }
 
-        // POST: /Account/Register
+        // post /Account/Register
         [HttpPost]
         public async Task<IActionResult> Register(AuthViewModel modelWrapper)
         {
             var model = modelWrapper.Register;
 
-            // 1. Очищаем ошибки, связанные с Логином (они пусты, и это нормально)
+            // опять ошибки
             ModelState.Remove("Login.Email");
             ModelState.Remove("Login.Password");
 
-            // 2. Теперь проверяем валидацию
+            //  проверяем валидацию
             if (ModelState.IsValid)
             {
                 var user = new IdentityUser { UserName = model.Email, Email = model.Email };

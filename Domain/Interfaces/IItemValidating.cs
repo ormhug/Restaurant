@@ -9,13 +9,13 @@ namespace Domain.Interfaces
 {
     public interface IItemValidating
     {
-        // Должен быть реализован в Restaurant и MenuItem
+
         string Status { get; set; }
 
-        // Возвращает список email-адресов, которые могут одобрить элемент [cite: 52]
+        // Возвращает список email-адресов, которые могут одобрить элемент
         List<string> GetValidators();
 
-        // Возвращает имя Partial View для отображения карточки [cite: 54]
+        // Возвращает имя Partial View для отображения карточки
         string GetCardPartial();
 
         List<string> Validate();

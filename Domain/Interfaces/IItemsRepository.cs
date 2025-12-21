@@ -5,9 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Domain.Entities;
-
 using System.Collections.Generic;
-using Domain.Interfaces; // Нужен для IItemValidating
+using Domain.Interfaces;
 
 namespace Domain.Interfaces
 {

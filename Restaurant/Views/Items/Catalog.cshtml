@@ -21,17 +21,14 @@
         <div class="row">
             @foreach (var item in Model)
             {
-                // col-12 (телефон: 1 в ряд)
-                // col-md-6 (планшет: 2 в ряд)
-                // col-lg-3 (ноутбук/десктоп: 4 в ряд)
+
                 <div class="col-12 col-md-6 col-lg-3 mb-4">
 
-                    @* Отображаем саму карточку (картинка, название, описание) *@
+                    @* самa карточкa (картинка, название, описание) *@
                     @await Html.PartialAsync(item.GetCardPartial(), (object)item)
 
-                    @* Большая кнопка внизу *@
+                    @* большая кнопка снизу *@
                     <div class="card-footer bg-white border-top-0">
-                        @* ВАЖНО: Добавлены скобки () в GetId() *@
                         <a asp-action="Details" asp-route-id="@item.GetId()" class="btn btn-primary w-100">
                             View Menu &raquo;
                         </a>

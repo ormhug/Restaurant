@@ -1,5 +1,4 @@
-﻿@* Views/BulkImport/Preview.cshtml *@
-@{
+﻿@{
     ViewData["Title"] = "Import Preview and Commit";
 }
 
@@ -15,9 +14,8 @@
         </div>
     </div>
 
-    @* --- 1. FORM FOR COMMIT AND ZIP UPLOAD (AA4.3.4) --- *@
+    @*форма для коммита и zip файла *@
 
-    @* The form must be multipart/form-data to handle the IFormFile zipFile *@
     <form asp-action="Commit" asp-controller="BulkImport" method="post" enctype="multipart/form-data">
 
         <div class="row mb-4 bg-light p-3 border rounded">
@@ -37,13 +35,13 @@
             </div>
         </div>
 
-        @* --- 2. VIEW COMPONENT INVOCATION FOR PREVIEW (AA4.3.2) --- *@
+        @* view component для preview *@
 
         <div class="row mt-4">
             <div class="col-12">
                 <h3>Items ready to commit:</h3>
 
-                @* Invokes the View Component that reads data from the in-memory cache *@
+                @* invokes the view component and reads memry cache *@
                 @(await Component.InvokeAsync("ImportPreview"))
             </div>
         </div>

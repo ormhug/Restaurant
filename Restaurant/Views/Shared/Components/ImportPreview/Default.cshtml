@@ -1,5 +1,5 @@
 ﻿@model List<Domain.Interfaces.IItemValidating>
-@* Используем модель List<IItemValidating> *@
+@*используем модель List<IItemValidating> *@
 
 <div class="row">
     @if (!Model.Any())
@@ -17,25 +17,20 @@
 
         @foreach (var item in Model)
         {
-            // Проверяем, является ли элемент рестораном
+            // проверка является ли элемент рестораном
             if (item is Domain.Entities.Restaurant restaurant)
             {
-                // ИЗМЕНЕНИЕ: Указываем полный путь к частичному представлению
-                // До: @await Html.PartialAsync("_RestaurantCardPartial", restaurant)
+
                 await Html.PartialAsync("~/Views/Items/_RestaurantCardPartial.cshtml", restaurant);
             }
             else if (item is Domain.Entities.MenuItem menuItem)
             {
-                // Если у вас есть частичное представление для MenuItem, измените и его
-                // await Html.PartialAsync("~/Views/Items/_MenuItemCardPartial.cshtml", menuItem);
-
-                // Пока просто отобразим его, если вы не создавали _MenuItemCardPartial
+                // отобразит если нету _MenuItemCardPartial
                 <p>Меню: @menuItem.Title - @menuItem.Price.ToString("C")</p>
             }
         }
 
         <div class="col-12 mt-4">
-            @* Кнопка для вызова метода Commit в BulkImportController *@
             <form asp-controller="BulkImport" asp-action="Commit" method="post">
                 <button type="submit" class="btn btn-success btn-lg">
                     <i class="fas fa-check-circle"></i> Commit Data to Database 

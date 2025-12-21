@@ -13,7 +13,7 @@
 
         <div class="form-group mb-3">
             <label for="jsonFile" class="form-label">Select JSON File:</label>
-            @* The name "jsonFile" must match the parameter in the BulkImport(IFormFile jsonFile) method *@
+            @* имя jsonfile должно совпадть в bulkimport *@
             <input type="file" id="jsonFile" name="jsonFile" class="form-control" accept=".json" required />
         </div>
 
@@ -24,7 +24,6 @@
 
     <hr />
 
-    @* Instruction for redirection to Step 2 *@
     <div class="alert alert-info mt-3">
         <strong>Important:</strong> After clicking "Upload," a ZIP file will be downloaded. Once the download is complete, please proceed to <a href="/BulkImport/Preview">Step 2 (Preview)</a> to review your data and upload images.
     </div>

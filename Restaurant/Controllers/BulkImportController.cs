@@ -19,7 +19,7 @@ public class BulkImportController : Controller
         _zipService = zipService;
     }
 
-    // AA2.3.4, AA4.3.3: Метод BulkImport теперь возвращает ZIP-файл
+
     [HttpPost]
     public async Task<IActionResult> BulkImport(
         IFormFile jsonFile,
@@ -52,23 +52,23 @@ public class BulkImportController : Controller
                 }
             }
 
-            // 1. Сохранение ТОЛЬКО валидных элементов в кэш
+            // Сохранение ТОЛЬКО валидных элементов в кэш
             await inMemoryRepo.SaveAsync(validItems);
 
-            // 2. Генерация ZIP-файла (AA4.3.3)
+            // Генерация zip файла 
             var zipBytes = _zipService.GenerateZipForDownload(validItems);
 
-            // 3. Возвращаем файл для скачивания
+            // Возвращаем файл для скачивания
             return File(
                 zipBytes,
                 "application/zip",
                 "Items_for_Image_Upload.zip");
         }
 
-        // НЕДОСТИЖИМЫЙ КОД (БЫЛ УДАЛЕН): return View("Preview");
+ 
     }
 
-    // НОВЫЙ GET-метод для отображения страницы предпросмотра после скачивания ZIP
+    //новый гет метод для отображения страницы предпросмотра после скачивания ZIP
     [HttpGet]
     public IActionResult Preview()
     {
@@ -82,14 +82,13 @@ public class BulkImportController : Controller
         return View();
     }
 
-    // AA4.3: Метод Commit (будет обновлен на следующем шаге для приема ZIP)
     [HttpPost]
     public async Task<IActionResult> Commit(
-        IFormFile zipFile, // НОВЫЙ ПАРАМЕТР: Принимаем ZIP-файл с изображениями
+        IFormFile zipFile, //Принимает zip файл с изображениями
         [FromKeyedServices(InMemoryKey)] IItemsRepository inMemoryRepo,
         [FromKeyedServices(DbKey)] IItemsRepository dbRepo)
     {
-        // 1. Чтение данных из кэша
+        // чтение данных из кэша
         var itemsToCommit = (await inMemoryRepo.GetAsync()).ToList();
 
         if (!itemsToCommit.Any())
@@ -97,20 +96,19 @@ public class BulkImportController : Controller
             return RedirectToAction("Catalog", "Items");
         }
 
-        // 2. [НОВЫЙ ШАГ] Обработка и сохранение изображений из ZIP (AA4.3.4)
+        // Обработка и сохранение изображений из zip
         if (zipFile != null && zipFile.Length > 0)
         {
-            // Вызываем сервис для извлечения, сохранения файлов и обновления itemsToCommit
             using (var stream = zipFile.OpenReadStream())
             {
                 await _zipService.ProcessUploadedZipAsync(stream, itemsToCommit);
             }
         }
 
-        // 3. Сохранение ОБНОВЛЕННЫХ данных в БД:
+        // сохранение в бд
         await dbRepo.SaveAsync(itemsToCommit);
 
-        // 4. Очистка кэша:
+        //Очистка кэша:
         inMemoryRepo.Clear();
 
         TempData["SuccessMessage"] = "Импорт данных и изображений завершен!";
